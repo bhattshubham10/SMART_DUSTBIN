@@ -1,0 +1,80 @@
+// Include the Ultrasonic library 
+#include <Ultrasonic.h> 
+// Define the pins for the ultrasonic sensor 
+#define TRIGGER_PIN  9 
+#define ECHO_PIN     10 
+// Define the threshold for the fill level (in centimeters) 
+#define FILL_THRESHOLD  20 
+// Define the pin for the alert LED 
+#define ALERT_LED_PIN  13 
+Ultrasonic ultrasonic(TRIGGER_PIN, ECHO_PIN); 
+void setup() { 
+  Serial.begin(9600); 
+  // Initialize the alert LED pin as an output 
+  pinMode(ALERT_LED_PIN, OUTPUT); 
+} 
+void loop() { 
+  float distance = ultrasonic.distanceRead(); 
+  Serial.print("Distance: "); 
+  Serial.print(distance); 
+  Serial.println(" cm"); 
+  if (distance <= FILL_THRESHOLD) { 
+    digitalWrite(ALERT_LED_PIN, HIGH); 
+    Serial.println("Dustbin is full! Please empty it."); 
+  } else { 
+    // If the fill level is below the threshold, turn off the alert LED 
+    digitalWrite(ALERT_LED_PIN, LOW); 
+  } 
+  delay(1000); // Adjust delay as needed 
+} 
+Smart dustbin code in C: 
+ 
+#include <8051.h> 
+// Define GPIO pins for ultrasonic sensor 
+#define TRIGGER_PIN P1_0 
+#define ECHO_PIN P1_1 
+// Define threshold for fill level (in centimeters) 
+#define FILL_THRESHOLD 20 
+// Define LED pin 
+#define ALERT_LED P1_2 
+// Function to generate delay in microseconds 
+void delay_us(unsigned int us) { 
+    unsigned int i, j; 
+    for (i = 0; i < us; i++) 
+        for (j = 0; j < 5; j++); 
+} 
+// Function to measure distance using ultrasonic sensor 
+unsigned int measure_distance() { 
+    unsigned int distance; 
+    // Send trigger pulse 
+    TRIGGER_PIN = 1; 
+    delay_us(10); 
+    TRIGGER_PIN = 0; 
+    // Measure pulse width 
+    while (!ECHO_PIN); 
+    TH0 = TL0 = 0;  // Clear timer 
+    while (ECHO_PIN); 
+    distance = TL0; // Store pulse width 
+    // Calculate distance (in centimeters) 
+    distance = (distance * 0.017); // Speed of sound in air = 343 m/s 
+    return distance; 
+} 
+// Main function 
+void main() { 
+    unsigned int distance; 
+    // Initialize LED pin as output 
+    ALERT_LED = 0;  
+    // Main loop 
+    while (1) { 
+        // Measure distance 
+        distance = measure_distance(); 
+        // Check if fill level is above threshold 
+        if (distance <= FILL_THRESHOLD) { 
+            // If fill level is above threshold, turn on alert LED 
+            ALERT_LED = 1; 
+        } else { 
+            // If fill level is below threshold, turn off alert LED 
+            ALERT_LED = 0; 
+        } 
+    } 
+} 
